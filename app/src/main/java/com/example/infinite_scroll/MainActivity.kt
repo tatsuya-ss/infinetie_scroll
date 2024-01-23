@@ -17,7 +17,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val articles = (0..30).map { it }.toMutableList()
+    private val articles = (1..30).map { it }.toMutableList()
+
+    private var previousMaxY = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,18 +39,20 @@ class MainActivity : AppCompatActivity() {
             object : OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-                    val extent = binding.infiniteRecyclerView.computeVerticalScrollExtent().toDouble()
-                    val offset = binding.infiniteRecyclerView.computeVerticalScrollOffset().toDouble()
-                    val range = binding.infiniteRecyclerView.computeVerticalScrollRange().toDouble()
-                    val total = range - extent
-                    val wariai = ((offset / total) * 100).toInt()
+                    val extent = binding.infiniteRecyclerView.computeVerticalScrollExtent()
+                    val offset = binding.infiniteRecyclerView.computeVerticalScrollOffset() - previousMaxY
+                    val range = binding.infiniteRecyclerView.computeVerticalScrollRange()
+                    val maxY = (range - extent)
+                    val resizeMaxY = maxY - previousMaxY
+                    val wariai = ((offset.toDouble() / resizeMaxY.toDouble()) * 100).toInt()
 
 
-                    if (wariai >= 60) {
+                    if (wariai >= 100) {
                         val adapter = (binding.infiniteRecyclerView.adapter as ArticleAdapter)
+                        previousMaxY = maxY
 
                         val max = articles.max()
-                        val nextArticles = (max..(max + 30)).map { it }.toMutableList()
+                        val nextArticles = (max + 1..(max + 30)).map { it }.toMutableList()
                         articles.addAll(nextArticles)
 
                         adapter.addArticles(articles)
