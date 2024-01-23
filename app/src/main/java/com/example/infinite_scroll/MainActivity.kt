@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.example.infinite_scroll.databinding.ActivityMainBinding
 import com.example.infinite_scroll.databinding.RowArticleItemBinding
@@ -46,10 +47,13 @@ class MainActivity : AppCompatActivity() {
                     val resizeMaxY = maxY - previousMaxY
                     val wariai = ((offset.toDouble() / resizeMaxY.toDouble()) * 100).toInt()
 
+                    Log.d("Tatsuya ٩( ᐛ )و", "onScrolled: offset $offset extent $extent range $range maxY $maxY resizeMaxY $resizeMaxY")
 
-                    if (wariai >= 100) {
+                    if (wariai >= 70) {
+                        val lastVisibleItemPosition = (binding.infiniteRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+                        Log.d("Tatsuya ٩( ᐛ )و", "onScrolled: $lastVisibleItemPosition 追加します")
                         val adapter = (binding.infiniteRecyclerView.adapter as ArticleAdapter)
-                        previousMaxY = maxY
+                        previousMaxY = maxY + extent
 
                         val max = articles.max()
                         val nextArticles = (max + 1..(max + 30)).map { it }.toMutableList()
