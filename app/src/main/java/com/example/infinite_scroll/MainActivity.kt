@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val articles = (0..30).map { it.toString() }.toMutableList()
+    private val articles = (0..30).map { it }.toMutableList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,12 +43,14 @@ class MainActivity : AppCompatActivity() {
                     val total = range - extent
                     val wariai = ((offset / total) * 100).toInt()
 
-                    Log.d("Tatsuya ٩( ᐛ )و", "現在のスクロール位置の割合: $wariai")
 
                     if (wariai >= 60) {
-                        Log.d("Tatsuya ٩( ᐛ )و", "リストを追加！！　現在のスクロール位置の割合: $wariai")
-                        articles.addAll(articles)
                         val adapter = (binding.infiniteRecyclerView.adapter as ArticleAdapter)
+
+                        val max = articles.max()
+                        val nextArticles = (max..(max + 30)).map { it }.toMutableList()
+                        articles.addAll(nextArticles)
+
                         adapter.addArticles(articles)
                         adapter.notifyDataSetChanged()
                     }
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 class ArticleAdapter(
-    private var dataSet: List<String>,
+    private var dataSet: List<Int>,
     private val context: Context,
 ) : RecyclerView.Adapter<ArticleAdapter.ViewHolder>() {
 
@@ -70,7 +72,7 @@ class ArticleAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.set(dataSet[position])
+        holder.set(dataSet[position].toString())
     }
 
     override fun getItemCount(): Int {
@@ -85,7 +87,7 @@ class ArticleAdapter(
         }
     }
 
-    fun addArticles(articles: List<String>) {
+    fun addArticles(articles: List<Int>) {
         dataSet = articles
     }
 }
