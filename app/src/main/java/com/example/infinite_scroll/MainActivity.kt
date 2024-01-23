@@ -3,13 +3,11 @@ package com.example.infinite_scroll
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.example.infinite_scroll.databinding.ActivityMainBinding
 import com.example.infinite_scroll.databinding.RowArticleItemBinding
@@ -20,7 +18,8 @@ class MainActivity : AppCompatActivity() {
 
     private val articles = (1..30).map { it }.toMutableList()
 
-    private var previousMaxY = 0
+    private var previousPageFromLatestMaxY = 0 // 最新ページの1つ前までのY
+    private val nextArticlesThreshold = 70 // 1ページのうち何%までスクロールしたら次を読み込むか。
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,20 +39,17 @@ class MainActivity : AppCompatActivity() {
             object : OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-                    val extent = binding.infiniteRecyclerView.computeVerticalScrollExtent()
-                    val offset = binding.infiniteRecyclerView.computeVerticalScrollOffset() - previousMaxY
+
+                    val extent = binding.infiniteRecyclerView.computeVerticalScrollExtent() // 不要な幅
                     val range = binding.infiniteRecyclerView.computeVerticalScrollRange()
-                    val maxY = (range - extent)
-                    val resizeMaxY = maxY - previousMaxY
-                    val wariai = ((offset.toDouble() / resizeMaxY.toDouble()) * 100).toInt()
+                    val allPagesMaxY = (range - extent)
+                    val latestPageMaxY = allPagesMaxY - previousPageFromLatestMaxY
+                    val latestPageOffset = binding.infiniteRecyclerView.computeVerticalScrollOffset() - previousPageFromLatestMaxY
+                    val wariai = ((latestPageOffset.toDouble() / latestPageMaxY.toDouble()) * 100).toInt()
 
-                    Log.d("Tatsuya ٩( ᐛ )و", "onScrolled: offset $offset extent $extent range $range maxY $maxY resizeMaxY $resizeMaxY")
-
-                    if (wariai >= 70) {
-                        val lastVisibleItemPosition = (binding.infiniteRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-                        Log.d("Tatsuya ٩( ᐛ )و", "onScrolled: $lastVisibleItemPosition 追加します")
+                    if (wariai >= nextArticlesThreshold) {
                         val adapter = (binding.infiniteRecyclerView.adapter as ArticleAdapter)
-                        previousMaxY = maxY + extent
+                        previousPageFromLatestMaxY = allPagesMaxY + extent
 
                         val max = articles.max()
                         val nextArticles = (max + 1..(max + 30)).map { it }.toMutableList()
